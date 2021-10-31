@@ -1,0 +1,150 @@
+ENIGMA-MACHINE
+
+An Enigma machine simulator.
+
+The Enigma machine is a cipher device used to encrypt German military
+communications during World War II.  Suppose your radio operator has
+received the following encoded message.
+
+     2220 - 204 - QWE EWG -
+
+     XYOWN LJPQH SVDWC LYXZQ FXHIU VWDJO BJNZX RCWEO TVNJC IONTF
+     QNSXW ISXKH JDAGD JVAKU KVMJA JHSZQ QJHZO IAVZO WMSCK ASRDN
+     XKKSR FHCXC MPJGX YIJCC KISYY SHETX VVOVD QLZYT NJXNU WKZRX
+     UJFXM BDIBR VMJKR HTCUJ QPTEE IYNYN JBEAQ JCLMU ODFWM ARQCF
+     OBWN
+
+The Enigma session to decipher the message is described below.
+
+     ;; Create the Enigma machine.
+     (setf enigma (make-enigma "I"))
+
+     ;; Apply the daily key settings from the code book.
+     (configure enigma :umkehrwalze "B"
+                       :walzenlage '("I" "IV" "III")
+                       :ringstellung '(16 26 8) ;P, Z, and H
+                       :steckerverbindungen '("AD" "CN" "ET" "FL" "GI"
+                                              "JV" "KZ" "PU" "QY" "WX"))
+
+     ;; Decode the message key.
+     (configure enigma :grundstellung "QWE")
+     (operate enigma nil "EWG")
+     ; ⇒ "RTZ"
+
+     ;; Apply the message key.
+     (configure enigma :grundstellung "RTZ")
+
+     ;; Decode the message text (ignoring the first block).
+     (operate enigma nil "
+           LJPQH SVDWC LYXZQ FXHIU VWDJO BJNZX RCWEO TVNJC IONTF
+     QNSXW ISXKH JDAGD JVAKU KVMJA JHSZQ QJHZO IAVZO WMSCK ASRDN
+     XKKSR FHCXC MPJGX YIJCC KISYY SHETX VVOVD QLZYT NJXNU WKZRX
+     UJFXM BDIBR VMJKR HTCUJ QPTEE IYNYN JBEAQ JCLMU ODFWM ARQCF
+     OBWN")
+     ; ⇒ "
+     ;      DASOB ERKOM MANDO DERWE HRMAQ TGIBT BEKAN NTXAA CHENX
+     ;AACHE NXIST GERET TETXD URQGE BUEND ELTEN EINSA TZDER HILFS
+     ;KRAEF TEKON NTEDI EBEDR OHUNG ABGEW ENDET UNDDI ERETT UNGDE
+     ;RSTAD TGEGE NXEIN SXAQT XNULL XNULL XUHRS IQERG ESTEL LTWER
+     ;DENX"
+
+Reformatting the plain text:
+
+     Das Oberkommando der Wehrmacht gibt bekannt: Aachen
+     ist gerettet. Durch gebündelten Einsatz der Hilfskräfte
+     konnte die Bedrohung abgewendet und die Rettung der Stadt
+     gegen 18:00 Uhr sichergestellt werden.
+
+See ‘https://en.wikipedia.org/wiki/Enigma_machine’ for more details
+about the Enigma machine.
+
+                                                                      [Function]
+make-enigma (model)
+   Create an Enigma machine.
+
+   Argument MODEL is a string designator identifying the Enigma model.
+    Known models are the Enigma I, Enigma-M3, and Enigma-M4.  Case is
+    not significant when specifying the model.
+
+   Return value is an Enigma object.
+
+                                                              [Generic Function]
+configure (enigma &rest options &key &allow-other-keys)
+   Configure an Enigma machine, i.e. apply configuration settings.
+
+   First argument ENIGMA is an Enigma object.
+   Keyword argument PLUGBOARD-CONNECTIONS, PLUGBOARD-CONNECTION,
+    or STECKERVERBINDUNGEN specifies the plugboard connections.
+    Value is a sequence of character pairs.  Each pair is either
+    a cons cell of the form ‘(CHAR1 . CHAR2)’ or a string with
+    two characters.
+   Keyword argument ENTRY-WHEEL or EINTRITTSWALZE specifies the
+    entry wheel.  Value is the wheel label of the entry wheel.
+    Most Enigma models have a fixed entry wheel which can't be
+    configured.
+   Keyword argument WHEEL-ORDER or WALZENLAGE specifies the wheel
+    order or the rotors from left to right.  Value is a sequence
+    of wheel labels.
+   Keyword argument RING-SETTINGS, RING-SETTING, or RINGSTELLUNG
+    specifies the ring settings of the rotors in wheel order.
+    Value is a sequence of wheel position indicators.  Default
+    is 1 for all rotors.
+   Keyword argument STARTING-POSITIONS, STARTING-POSITION, or
+    GRUNDSTELLUNG specifies the starting position of the rotors in
+    wheel order.  Value is a sequence of wheel position indicators.
+    Default is 1 for all rotors.
+   Keyword argument REFLECTOR or UMKEHRWALZE specifies the reflector.
+    Value is the wheel label of the reflector.
+   Keyword argument REFLECTOR-WIRING or UMKEHRWALZENVERDRAHTUNG
+    specifies the wiring of a reconfigurable reflector.  Value is
+    a sequence of character pairs.  Each pair is either a cons cell
+    of the form ‘(CHAR1 . CHAR2)’ or a string with two characters.
+
+   A wheel label is a string designator (i.e. a string, a character,
+    or a symbol).  Case is not significant for wheel labels.
+   A wheel position indicator is either a one-based integer or a
+    character designator (i.e. a character or a string of length
+    one).  Case is significant for wheel position indicators.
+
+   All configuration settings can be addressed by multiple keyword
+   arguments.  If more than one such keyword argument matches, the
+   leftmost keyword argument is used (no error).
+
+   The values of the keyword arguments are not checked.  This is
+   done when the Enigma machine is going to be operated.  Thus,
+   you can force argument checking by executing a no-operation
+   command, e.g. ‘(operate ENIGMA t nil)’.
+
+   Multiple calls to ‘configure’ accumulate.  Call ‘reset’ to remove
+   all configuration settings.
+
+   Return value is the Enigma object.
+
+                                                              [Generic Function]
+reset (enigma)
+   Reset an Enigma machine, i.e. remove all configuration settings.
+
+   Argument ENIGMA is an Enigma object.
+
+   Return value is the Enigma object.
+
+                                                              [Generic Function]
+operate (enigma destination source)
+   Operate an Enigma machine.
+
+   The ‘operate’ method produces output by entering characters read from
+   the source into the Enigma machine.  The displayed characters are then
+   printed to the destination.  Characters not in the alphabet of the
+   Enigma machine are printed unprocessed.
+
+   First argument ENIGMA is an Enigma object.
+   Second argument DESTINATION is the output object.  Value is either a
+    stream, a pathname, or a string.  The special value ‘t’ is equal to
+    ‘*standard-output*’ and ‘nil’ means to return a string.
+   Third argument SOURCE is the input object.  Value is either a stream,
+    a pathname, or a string.  The special value ‘t’ is equal to
+    ‘*standard-input*’ and ‘nil’ is equal to an empty string.
+
+   If DESTINATION is a stream, a pathname, a string, or ‘t’, then the
+   result is ‘nil’.  Otherwise, the result is a string containing the
+   output.

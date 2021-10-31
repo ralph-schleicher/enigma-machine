@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8"/>
+  <title>ENIGMA-MACHINE</title>
+  <style type="text/css">
+   *{margin:0;border:0;padding:0}
+   body{color:#000;background-color:#fff;font-family:sans-serif;padding:1em;min-width:46em}
+   a{color:inherit;background-color:transparent;text-decoration:none}
+   table{border-collapse:collapse}
+   div.title{padding:1em}
+   div.subtitle{padding:1em}
+   div.prologue{padding:1em}
+   div.epilogue{padding:1em}
+   span.category{color:#212121;font-style:italic}
+   span.package,span.symbol{color:#212121;font-weight:700;white-space:nowrap}
+   span.lambda-list{color:#616161}
+   span.lambda-list-keyword{color:#388E3C;white-space:nowrap}
+   span.keyword{color:#212121;white-space:nowrap}
+   span.variable{color:#212121;font-style:italic;white-space:nowrap}
+   span.init-form{white-space:nowrap}
+   span.method-specializers{color:#616161}
+   span.method-specializer{color:#212121;white-space:nowrap}
+   span.method-qualifier{color:#212121;white-space:nowrap}
+   div.contents{padding:1em}
+   div.contents-listing{padding:1em}
+   div.contents-listing ul{list-style-type:none}
+   @media all and (min-width:68em){div.contents-listing{column-count:2;column-gap:2em}}
+   div.definition{padding:1em}
+   div.signature{background-color:#F5F5F5;padding:1ex 1em}
+   table.signature td.symbol{text-align:left;vertical-align:baseline;white-space:nowrap;padding-right:.5em}
+   table.signature td.lambda-list{text-align:left;vertical-align:baseline;width:100%}
+   table.signature td.category{text-align:right;vertical-align:baseline;white-space:nowrap;padding-left:1.5em}
+   div.documentation{padding:1em}
+  </style>
+ </head>
+ <body>
+  <div class="title">
+   <h1>ENIGMA-MACHINE</h1>
+  </div>
+  <div class="prologue">
+   <pre>An Enigma machine simulator.
+
+The Enigma machine is a cipher device used to encrypt German military
+communications during World War II.  Suppose your radio operator has
+received the following encoded message.
+
+     2220 - 204 - QWE EWG -
+
+     XYOWN LJPQH SVDWC LYXZQ FXHIU VWDJO BJNZX RCWEO TVNJC IONTF
+     QNSXW ISXKH JDAGD JVAKU KVMJA JHSZQ QJHZO IAVZO WMSCK ASRDN
+     XKKSR FHCXC MPJGX YIJCC KISYY SHETX VVOVD QLZYT NJXNU WKZRX
+     UJFXM BDIBR VMJKR HTCUJ QPTEE IYNYN JBEAQ JCLMU ODFWM ARQCF
+     OBWN
+
+The Enigma session to decipher the message is described below.
+
+     ;; Create the Enigma machine.
+     (setf enigma (make-enigma "I"))
+
+     ;; Apply the daily key settings from the code book.
+     (configure enigma :umkehrwalze "B"
+                       :walzenlage '("I" "IV" "III")
+                       :ringstellung '(16 26 8) ;P, Z, and H
+                       :steckerverbindungen '("AD" "CN" "ET" "FL" "GI"
+                                              "JV" "KZ" "PU" "QY" "WX"))
+
+     ;; Decode the message key.
+     (configure enigma :grundstellung "QWE")
+     (operate enigma nil "EWG")
+     ; ⇒ "RTZ"
+
+     ;; Apply the message key.
+     (configure enigma :grundstellung "RTZ")
+
+     ;; Decode the message text (ignoring the first block).
+     (operate enigma nil "
+           LJPQH SVDWC LYXZQ FXHIU VWDJO BJNZX RCWEO TVNJC IONTF
+     QNSXW ISXKH JDAGD JVAKU KVMJA JHSZQ QJHZO IAVZO WMSCK ASRDN
+     XKKSR FHCXC MPJGX YIJCC KISYY SHETX VVOVD QLZYT NJXNU WKZRX
+     UJFXM BDIBR VMJKR HTCUJ QPTEE IYNYN JBEAQ JCLMU ODFWM ARQCF
+     OBWN")
+     ; ⇒ "
+     ;      DASOB ERKOM MANDO DERWE HRMAQ TGIBT BEKAN NTXAA CHENX
+     ;AACHE NXIST GERET TETXD URQGE BUEND ELTEN EINSA TZDER HILFS
+     ;KRAEF TEKON NTEDI EBEDR OHUNG ABGEW ENDET UNDDI ERETT UNGDE
+     ;RSTAD TGEGE NXEIN SXAQT XNULL XNULL XUHRS IQERG ESTEL LTWER
+     ;DENX"
+
+Reformatting the plain text:
+
+     Das Oberkommando der Wehrmacht gibt bekannt: Aachen
+     ist gerettet. Durch gebündelten Einsatz der Hilfskräfte
+     konnte die Bedrohung abgewendet und die Rettung der Stadt
+     gegen 18:00 Uhr sichergestellt werden.
+
+See ‘https://en.wikipedia.org/wiki/Enigma_machine’ for more details
+about the Enigma machine.</pre>
+  </div>
+  <div class="contents" id="contents">
+   <h2>Contents</h2>
+   <div class="contents-listing">
+    <ul>
+     <li>
+      <a href="#_c11cc88e-521b-53e6-aba2-27fab35d2af7">
+       <span class="category">Function</span>
+       <span class="symbol">make-enigma</span>
+      </a>
+     </li>
+     <li>
+      <a href="#_cd1b6abd-596c-52e2-b369-80d42c7aed23">
+       <span class="category">Generic Function</span>
+       <span class="symbol">configure</span>
+      </a>
+     </li>
+     <li>
+      <a href="#_c035e656-6519-56c5-b15b-49c453263d90">
+       <span class="category">Generic Function</span>
+       <span class="symbol">reset</span>
+      </a>
+     </li>
+     <li>
+      <a href="#_e3213895-2054-578b-b8d9-9dcc481e259d">
+       <span class="category">Generic Function</span>
+       <span class="symbol">operate</span>
+      </a>
+     </li>
+    </ul>
+   </div>
+  </div>
+  <div class="dictionary">
+   <div class="definition" id="_c11cc88e-521b-53e6-aba2-27fab35d2af7">
+    <div class="signature">
+     <table class="signature">
+      <colgroup>
+       <col />
+       <col />
+       <col />
+      </colgroup>
+      <tbody>
+       <tr>
+	<td class="symbol"><a href="#contents"><span class="symbol">make-enigma</span></a></td>
+	<td class="lambda-list"><span class="lambda-list">(<span class="variable">model</span>)</span></td>
+	<td class="category"><span class="category">Function</span></td>
+       </tr>
+      </tbody>
+     </table>
+    </div>
+    <div class="documentation">
+     <pre>Create an Enigma machine.
+
+Argument MODEL is a string designator identifying the Enigma model.
+ Known models are the Enigma I, Enigma-M3, and Enigma-M4.  Case is
+ not significant when specifying the model.
+
+Return value is an Enigma object.</pre>
+    </div>
+   </div>
+   <div class="definition" id="_cd1b6abd-596c-52e2-b369-80d42c7aed23">
+    <div class="signature">
+     <table class="signature">
+      <colgroup>
+       <col />
+       <col />
+       <col />
+      </colgroup>
+      <tbody>
+       <tr>
+	<td class="symbol"><a href="#contents"><span class="symbol">configure</span></a></td>
+	<td class="lambda-list"><span class="lambda-list">(<span class="variable">enigma</span> <span class="lambda-list-keyword">&amp;rest</span> <span class="variable">options</span> <span class="lambda-list-keyword">&amp;key</span> <span class="lambda-list-keyword">&amp;allow-other-keys</span>)</span></td>
+	<td class="category"><span class="category">Generic Function</span></td>
+       </tr>
+      </tbody>
+     </table>
+    </div>
+    <div class="documentation">
+     <pre>Configure an Enigma machine, i.e. apply configuration settings.
+
+First argument ENIGMA is an Enigma object.
+Keyword argument PLUGBOARD-CONNECTIONS, PLUGBOARD-CONNECTION,
+ or STECKERVERBINDUNGEN specifies the plugboard connections.
+ Value is a sequence of character pairs.  Each pair is either
+ a cons cell of the form ‘(CHAR1 . CHAR2)’ or a string with
+ two characters.
+Keyword argument ENTRY-WHEEL or EINTRITTSWALZE specifies the
+ entry wheel.  Value is the wheel label of the entry wheel.
+ Most Enigma models have a fixed entry wheel which can't be
+ configured.
+Keyword argument WHEEL-ORDER or WALZENLAGE specifies the wheel
+ order or the rotors from left to right.  Value is a sequence
+ of wheel labels.
+Keyword argument RING-SETTINGS, RING-SETTING, or RINGSTELLUNG
+ specifies the ring settings of the rotors in wheel order.
+ Value is a sequence of wheel position indicators.  Default
+ is 1 for all rotors.
+Keyword argument STARTING-POSITIONS, STARTING-POSITION, or
+ GRUNDSTELLUNG specifies the starting position of the rotors in
+ wheel order.  Value is a sequence of wheel position indicators.
+ Default is 1 for all rotors.
+Keyword argument REFLECTOR or UMKEHRWALZE specifies the reflector.
+ Value is the wheel label of the reflector.
+Keyword argument REFLECTOR-WIRING or UMKEHRWALZENVERDRAHTUNG
+ specifies the wiring of a reconfigurable reflector.  Value is
+ a sequence of character pairs.  Each pair is either a cons cell
+ of the form ‘(CHAR1 . CHAR2)’ or a string with two characters.
+
+A wheel label is a string designator (i.e. a string, a character,
+ or a symbol).  Case is not significant for wheel labels.
+A wheel position indicator is either a one-based integer or a
+ character designator (i.e. a character or a string of length
+ one).  Case is significant for wheel position indicators.
+
+All configuration settings can be addressed by multiple keyword
+arguments.  If more than one such keyword argument matches, the
+leftmost keyword argument is used (no error).
+
+The values of the keyword arguments are not checked.  This is
+done when the Enigma machine is going to be operated.  Thus,
+you can force argument checking by executing a no-operation
+command, e.g. ‘(operate ENIGMA t nil)’.
+
+Multiple calls to ‘configure’ accumulate.  Call ‘reset’ to remove
+all configuration settings.
+
+Return value is the Enigma object.</pre>
+    </div>
+   </div>
+   <div class="definition" id="_c035e656-6519-56c5-b15b-49c453263d90">
+    <div class="signature">
+     <table class="signature">
+      <colgroup>
+       <col />
+       <col />
+       <col />
+      </colgroup>
+      <tbody>
+       <tr>
+	<td class="symbol"><a href="#contents"><span class="symbol">reset</span></a></td>
+	<td class="lambda-list"><span class="lambda-list">(<span class="variable">enigma</span>)</span></td>
+	<td class="category"><span class="category">Generic Function</span></td>
+       </tr>
+      </tbody>
+     </table>
+    </div>
+    <div class="documentation">
+     <pre>Reset an Enigma machine, i.e. remove all configuration settings.
+
+Argument ENIGMA is an Enigma object.
+
+Return value is the Enigma object.</pre>
+    </div>
+   </div>
+   <div class="definition" id="_e3213895-2054-578b-b8d9-9dcc481e259d">
+    <div class="signature">
+     <table class="signature">
+      <colgroup>
+       <col />
+       <col />
+       <col />
+      </colgroup>
+      <tbody>
+       <tr>
+	<td class="symbol"><a href="#contents"><span class="symbol">operate</span></a></td>
+	<td class="lambda-list"><span class="lambda-list">(<span class="variable">enigma</span> <span class="variable">destination</span> <span class="variable">source</span>)</span></td>
+	<td class="category"><span class="category">Generic Function</span></td>
+       </tr>
+      </tbody>
+     </table>
+    </div>
+    <div class="documentation">
+     <pre>Operate an Enigma machine.
+
+The ‘operate’ method produces output by entering characters read from
+the source into the Enigma machine.  The displayed characters are then
+printed to the destination.  Characters not in the alphabet of the
+Enigma machine are printed unprocessed.
+
+First argument ENIGMA is an Enigma object.
+Second argument DESTINATION is the output object.  Value is either a
+ stream, a pathname, or a string.  The special value ‘t’ is equal to
+ ‘*standard-output*’ and ‘nil’ means to return a string.
+Third argument SOURCE is the input object.  Value is either a stream,
+ a pathname, or a string.  The special value ‘t’ is equal to
+ ‘*standard-input*’ and ‘nil’ is equal to an empty string.
+
+If DESTINATION is a stream, a pathname, a string, or ‘t’, then the
+result is ‘nil’.  Otherwise, the result is a string containing the
+output.</pre>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>

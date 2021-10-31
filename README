@@ -1,0 +1,57 @@
+An Enigma machine simulator.
+
+The Enigma machine is a cipher device used to encrypt German military
+communications during World War II.  Suppose your radio operator has
+received the following encoded message.
+
+     2220 - 204 - QWE EWG -
+
+     XYOWN LJPQH SVDWC LYXZQ FXHIU VWDJO BJNZX RCWEO TVNJC IONTF
+     QNSXW ISXKH JDAGD JVAKU KVMJA JHSZQ QJHZO IAVZO WMSCK ASRDN
+     XKKSR FHCXC MPJGX YIJCC KISYY SHETX VVOVD QLZYT NJXNU WKZRX
+     UJFXM BDIBR VMJKR HTCUJ QPTEE IYNYN JBEAQ JCLMU ODFWM ARQCF
+     OBWN
+
+The Enigma session to decipher the message is described below.
+
+     ;; Create the Enigma machine.
+     (setf enigma (make-enigma "I"))
+
+     ;; Apply the daily key settings from the code book.
+     (configure enigma :umkehrwalze "B"
+                       :walzenlage '("I" "IV" "III")
+                       :ringstellung '(16 26 8) ;P, Z, and H
+                       :steckerverbindungen '("AD" "CN" "ET" "FL" "GI"
+                                              "JV" "KZ" "PU" "QY" "WX"))
+
+     ;; Decode the message key.
+     (configure enigma :grundstellung "QWE")
+     (operate enigma nil "EWG")
+     ; ⇒ "RTZ"
+
+     ;; Apply the message key.
+     (configure enigma :grundstellung "RTZ")
+
+     ;; Decode the message text (ignoring the first block).
+     (operate enigma nil "
+           LJPQH SVDWC LYXZQ FXHIU VWDJO BJNZX RCWEO TVNJC IONTF
+     QNSXW ISXKH JDAGD JVAKU KVMJA JHSZQ QJHZO IAVZO WMSCK ASRDN
+     XKKSR FHCXC MPJGX YIJCC KISYY SHETX VVOVD QLZYT NJXNU WKZRX
+     UJFXM BDIBR VMJKR HTCUJ QPTEE IYNYN JBEAQ JCLMU ODFWM ARQCF
+     OBWN")
+     ; ⇒ "
+     ;      DASOB ERKOM MANDO DERWE HRMAQ TGIBT BEKAN NTXAA CHENX
+     ;AACHE NXIST GERET TETXD URQGE BUEND ELTEN EINSA TZDER HILFS
+     ;KRAEF TEKON NTEDI EBEDR OHUNG ABGEW ENDET UNDDI ERETT UNGDE
+     ;RSTAD TGEGE NXEIN SXAQT XNULL XNULL XUHRS IQERG ESTEL LTWER
+     ;DENX"
+
+Reformatting the plain text:
+
+     Das Oberkommando der Wehrmacht gibt bekannt: Aachen
+     ist gerettet. Durch gebündelten Einsatz der Hilfskräfte
+     konnte die Bedrohung abgewendet und die Rettung der Stadt
+     gegen 18:00 Uhr sichergestellt werden.
+
+See ‘https://en.wikipedia.org/wiki/Enigma_machine’ for more details
+about the Enigma machine.
