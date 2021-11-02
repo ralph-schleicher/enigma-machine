@@ -40,7 +40,7 @@
   :author "Ralph Schleicher <rs@ralph-schleicher.de>"
   :license "Modified BSD License"
   :version "1.0"
-  :depends-on (:alexandria :iterate)
+  :depends-on (:alexandria :iterate :cl-unicode)
   :components ((:file "enigma-machine")))
 
 ;; enigma-machine.asd ends here
