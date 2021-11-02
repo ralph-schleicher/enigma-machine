@@ -102,12 +102,30 @@ about the Enigma machine."))
 
 (in-package :enigma-machine)
 
+(defmacro defconst (name value &optional doc)
+  "Define a constant variable.
+
+This is like ‘defconstant’ except that the initially set value
+is reused when the ‘defconst’ form is evaluated again."
+  `(defconstant ,name (if (boundp ',name) (symbol-value ',name) ,value)
+     ,@(when doc (list doc))))
+
+(defmacro defsubst (name arg-list &body body)
+  "Define an inline function.
+
+This is like ‘defun’ except that the function is globally marked
+for inline expansion by the compiler."
+  `(progn
+     (declaim (inline ,name))
+     (defun ,name ,arg-list
+       ,@body)))
+
 (defparameter *alphabet*
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   "The default alphabet.")
 
 (defparameter *wheels*
-  '(;; Enigma I, M3, and M4.
+  `(;; Enigma I, M3, and M4.
     ;;              ABCDEFGHIJKLMNOPQRSTUVWXYZ
     (i-i    "I"    "EKMFLGDQVZNTOWYHXUSPAIBRCJ" :turnover "Q")
     (i-ii   "II"   "AJDKSIRUXBLHWTMCQGZNPYFVOE" :turnover "E")
@@ -121,11 +139,11 @@ about the Enigma machine."))
     (i-b    "B"    "YRUHQSLDPXNGOKMIEBFZCWVJAT")
     (i-c    "C"    "FVPJIAOYEDRZXWGCTKUQSBNMHL")
     ;; Enigma M4 (thin wheels).
-    ;;              ABCDEFGHIJKLMNOPQRSTUVWXYZ
-    (m4-beta   "β" "LEYJVCNIXWPBQMDRTAKZGFUHOS" :position 1 :static t)
-    (m4-gamma  "γ" "FSOKANUERHMBTIYCWLQPZXVGJD" :position 1 :static t)
-    (m4-bruno  "B" "ENKQAUYWJICOPBLMDXZVFTHRGS")
-    (m4-caesar "C" "RDOBJNTKVEHMLFCWZAXGYIPSUQ"))
+    ;;                 ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    (m4-beta   ,beta  "LEYJVCNIXWPBQMDRTAKZGFUHOS" :position 1 :static t)
+    (m4-gamma  ,gamma "FSOKANUERHMBTIYCWLQPZXVGJD" :position 1 :static t)
+    (m4-bruno  "B"    "ENKQAUYWJICOPBLMDXZVFTHRGS")
+    (m4-caesar "C"    "RDOBJNTKVEHMLFCWZAXGYIPSUQ"))
   "Alist of Enigma wheels.
 List elements are cons cells of the form
 
@@ -194,7 +212,7 @@ backward direction is from the reflector to the entry wheel.")
      :plugboard-characters t
      :rotors-in-series 4
      :reflector "B"
-     :wheel-order ("β" "I" "II" "III")))
+     :wheel-order (,beta "I" "II" "III")))
   "Alist of Enigma models.")
 
 (defclass enigma ()
