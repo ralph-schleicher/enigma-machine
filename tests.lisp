@@ -46,6 +46,31 @@
 
 (in-package :enigma-machine-tests)
 
+(defun double-stepping (model)
+  (let ((enigma (make-enigma model)) expected)
+    (ecase model
+      ((:I :M3)
+       (configure enigma :umkehrwalze "B"
+			 :walzenlage '("I" "II" "III")
+			 :grundstellung "ADU")
+       (setf expected "BFY"))
+      ((:M4)
+       (configure enigma :umkehrwalze "B"
+			 :walzenlage '("β" "I" "II" "III")
+			 :grundstellung "ZADU")
+       (setf expected "ZBFY")))
+    (operate enigma nil "NNNN")
+    (assert-equal
+     expected
+     (iter (with alphabet = (slot-value enigma 'enigma-machine::alphabet))
+	   (for wheel :in-vector (slot-value enigma 'enigma-machine::rotors*))
+	   (collecting (aref alphabet (first wheel)) :result-type 'string)))))
+
+(define-test double-stepping-tests
+  (double-stepping :I)
+  (double-stepping :M3)
+  (double-stepping :M4))
+
 (defun aachen (model)
   (let ((enigma (make-enigma model)))
     (ecase model
