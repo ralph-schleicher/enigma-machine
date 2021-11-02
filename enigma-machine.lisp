@@ -120,6 +120,14 @@ for inline expansion by the compiler."
      (defun ,name ,arg-list
        ,@body)))
 
+(defconst beta
+  (coerce (vector (cl-unicode:character-named "U+03B2" :try-hex-notation-p t)) 'string)
+  "Greek small letter beta as a string.")
+
+(defconst gamma
+  (coerce (vector (cl-unicode:character-named "U+03B3" :try-hex-notation-p t)) 'string)
+  "Greek small letter gamma as a string.")
+
 (defparameter *alphabet*
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   "The default alphabet.")
