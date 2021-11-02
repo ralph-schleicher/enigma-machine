@@ -55,6 +55,7 @@ clean:
 .PHONY: check
 check: all
 	quicklisp-check-build -sbcl -ccl $(PACKAGE)
+	sbcl --non-interactive --load tests.lisp
 
 ### Maintenance
 
