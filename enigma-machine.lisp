@@ -133,25 +133,42 @@ for inline expansion by the compiler."
   "The default alphabet.")
 
 (defparameter *wheels*
-  `(;; Enigma I, M3, and M4.
+  `(;; Enigma I and Enigma-M.
+    ;;
     ;;              ABCDEFGHIJKLMNOPQRSTUVWXYZ
     (i-i    "I"    "EKMFLGDQVZNTOWYHXUSPAIBRCJ" :turnover "Q")
     (i-ii   "II"   "AJDKSIRUXBLHWTMCQGZNPYFVOE" :turnover "E")
     (i-iii  "III"  "BDFHJLCPRTXVZNYEIWGAKMUSQO" :turnover "V")
     (i-iv   "IV"   "ESOVPZJAYQUIRHXLNFTGKDCMWB" :turnover "J")
     (i-v    "V"    "VZBRGITYUPSDNHLXAWMJQOFECK" :turnover "Z")
-    (i-vi   "VI"   "JPGVOUMFYQBENHZRDKASXLICTW" :turnover "ZM")
-    (i-vii  "VII"  "NZJHGRCXMYSWBOUFAIVLPEKQDT" :turnover "ZM")
-    (i-viii "VIII" "FKQHTLXOCBJSPDZRAMEWNIUYGV" :turnover "ZM")
+    (i-vi   "VI"   "JPGVOUMFYQBENHZRDKASXLICTW" :turnover "MZ")
+    (i-vii  "VII"  "NZJHGRCXMYSWBOUFAIVLPEKQDT" :turnover "MZ")
+    (i-viii "VIII" "FKQHTLXOCBJSPDZRAMEWNIUYGV" :turnover "MZ")
     (i-a    "A"    "EJMZALYXVBWFCRQUONTSPIKHGD")
     (i-b    "B"    "YRUHQSLDPXNGOKMIEBFZCWVJAT")
     (i-c    "C"    "FVPJIAOYEDRZXWGCTKUQSBNMHL")
-    ;; Enigma M4 (thin wheels).
+    ;;
+    ;; Enigma-M4 (thin wheels).
+    ;;
     ;;                 ABCDEFGHIJKLMNOPQRSTUVWXYZ
     (m4-beta   ,beta  "LEYJVCNIXWPBQMDRTAKZGFUHOS" :position 1 :static t)
     (m4-gamma  ,gamma "FSOKANUERHMBTIYCWLQPZXVGJD" :position 1 :static t)
     (m4-bruno  "B"    "ENKQAUYWJICOPBLMDXZVFTHRGS")
-    (m4-caesar "C"    "RDOBJNTKVEHMLFCWZAXGYIPSUQ"))
+    (m4-caesar "C"    "RDOBJNTKVEHMLFCWZAXGYIPSUQ")
+    ;;
+    ;; Enigma-G.
+    ;;
+    ;;             ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    (g-etw  "ETW" "QWERTZUIOASDFGHJKPYXCVBNML")
+    (g-i    "I"   "LPGSZMHAEOQKVXRFYBUTNICJDW" :turnover "ABCEFGIKLOPQSUVWZ")
+    (g-ii   "II"  "SLVGBTFXJQOHEWIRZYAMKPCNDU" :turnover "ACDFGHKMNQSTVYZ")
+    (g-iii  "III" "CJGDPSHKTURAWZXFMYNQOBVLIE" :turnover "AEFHKMNRUWX")
+    (g-ukw  "UKW" "IMETCGFRAYSQBZXWLHKDVUPOJN" :position 1)
+    ;;
+    ;; Dummy wheel.
+    ;;
+    ;;            ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    (identity "" "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
   "Alist of Enigma wheels.
 List elements are cons cells of the form
 
@@ -220,7 +237,18 @@ backward direction is from the reflector to the entry wheel.")
      :plugboard-characters t
      :rotors-in-series 4
      :reflector "B"
-     :wheel-order (,beta "I" "II" "III")))
+     :wheel-order (,beta "I" "II" "III"))
+    ;; The Zählwerk Enigma and its descendants, the Enigma-G
+    ;; models, have two notable features: a gear drive and a
+    ;; moving reflector with ring setting.
+    (enigma-g
+     :model "Enigma-G"
+     :entry-wheels ,(wheel-set 'g-etw)
+     :rotors ,(wheel-set 'g-i 'g-ii 'g-iii 'g-ukw)
+     :rotors-in-series 4
+     :features (:single-stepping :moving-reflector)
+     :entry-wheel "ETW"
+     :wheel-order ("UKW" "I" "II" "III")))
   "Alist of Enigma models.")
 
 (defclass enigma ()
@@ -257,6 +285,16 @@ backward direction is from the reflector to the entry wheel.")
     :initform 0
     :type fixnum
     :documentation "Number of rotors during operation.")
+   (features
+    :initarg :features
+    :initform nil
+    ;; :single-stepping
+    ;;      Omit the double-stepping anomaly.  Only the original
+    ;;      Zählwerk Enigma and the derived Enigma-G models have
+    ;;      this feature.
+    ;; :moving-reflector
+    ;;      The reflector is involved in the rotor stepping.
+    :documentation "Machine features.")
    ;; Configuration settings.
    (plugboard-connections
     :initform nil
@@ -326,6 +364,11 @@ Return value is an Enigma object."
 			      ((member string '("ENIGMA-M4" "ENIGMA M4" "M4")
 				       :test #'string=)
 			       'enigma-m4)
+			      ((or (member string '("ENIGMA-G" "ENIGMA G" "G")
+					   :test #'string=)
+				   (member string '("ENIGMA-G31" "ENIGMA G31" "G31")
+					   :test #'string=))
+			       'enigma-g)
 			      (t
 			       (error "Unknown Enigma model ‘~A’." model))))
 		      *models*))))
@@ -608,13 +651,13 @@ We use a vector so that we can access each rotor easily."
 
 (defun %compile-reflector (enigma)
   "The compiled reflector is a cipher alphabet."
-  (with-slots (reflectors reflector) enigma
+  (with-slots (features reflectors reflector) enigma
     ;; Theoretically it is possible to simulate/build an Enigma
     ;; machine without a reflector but with a static exit wheel.
     ;; Thus, eliminating one of the major weaknesses, i.e. that
     ;; no character can be enciphered to itself.  Removing this
     ;; check should do the trick.
-    (when (null reflector)
+    (when (and (null reflector) (not (member :moving-reflector features)))
       (error "Reflector is not configured."))
     (if (null reflectors)
 	(unless (null reflector)
@@ -662,7 +705,7 @@ We use a vector so that we can access each rotor easily."
 
 (defun %rotor-stepping (enigma)
   "Rotate the rotors for a single key press."
-  (with-slots (length* rotors*) enigma
+  (with-slots (features length* rotors*) enigma
     (iter (with step = nil)
 	  (with turnoverp = nil)
 	  (for wheel :in-vector rotors* :downto 0)
@@ -678,14 +721,16 @@ We use a vector so that we can access each rotor easily."
 			      (position (first wheel) turnover)))
 	    (when step
 	      (setf (first wheel) (mod (1+ (first wheel)) length*))
-	      ;; If the middle wheel is in turnover position, move
-	      ;; it, too.  This is the double-stepping anomaly of
-	      ;; the Enigma machine.
-	      (when (and (not (null right))
-			 (let ((prop (third middle)))
-			   (when (not (getf prop :static))
-			     (position (first middle) (getf prop :turnover)))))
-		(setf (first middle) (mod (1+ (first middle)) length*))))))))
+	      (with single-stepping = (member :single-stepping features))
+	      (unless single-stepping
+		;; If the middle wheel is in turnover position, move
+		;; it, too.  This is the double-stepping anomaly of
+		;; the Enigma machine.
+		(when (and (not (null right))
+			   (let ((prop (third middle)))
+			     (when (not (getf prop :static))
+			       (position (first middle) (getf prop :turnover)))))
+		  (setf (first middle) (mod (1+ (first middle)) length*)))))))))
 
 (defun %route (char-pos wheel key)
   "Route a signal (a character of the alphabet) through a wheel.
@@ -719,7 +764,7 @@ wheel."
   "Route the signal (a character of the alphabet) through the machine.
 That is, simulate the flow of electrical current from the keyboard to
 the display."
-  (with-slots (plugboard* stator* rotors* reflector*) enigma
+  (with-slots (features plugboard* stator* rotors* reflector*) enigma
     ;; Plugboard.
     (when (not (null plugboard*))
       (setf char-pos (aref plugboard* char-pos)))
@@ -730,10 +775,11 @@ the display."
     (iter (for wheel :in-vector rotors* :downto 0)
 	  (setf char-pos (%forward char-pos wheel)))
     ;; Reflector.  See comment in ‘%compile-reflector’.
-    (when (not (null reflector*))
-      (setf char-pos (aref reflector* char-pos))
-      ;; Rotors in wheel order.
-      (iter (for wheel :in-vector rotors*)
+    (when (or reflector* (member :moving-reflector features))
+      (when (not (null reflector*))
+	(setf char-pos (aref reflector* char-pos)))
+      ;; Rotors in wheel order, but omit a moving reflector.
+      (iter (for wheel :in-vector rotors* :from (if (member :moving-reflector features) 1 0))
 	    (setf char-pos (%backward char-pos wheel)))
       ;; Entry wheel.
       (when (not (null stator*))
