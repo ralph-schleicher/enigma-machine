@@ -125,6 +125,12 @@ about the Enigma machine.</pre>
        <span class="symbol">operate</span>
       </a>
      </li>
+     <li>
+      <a href="#_64ecab79-f487-5daf-b6a7-fb142fefff92">
+       <span class="category">Function</span>
+       <span class="symbol">rotor-positions</span>
+      </a>
+     </li>
     </ul>
    </div>
   </div>
@@ -286,6 +292,33 @@ Third argument SOURCE is the input object.  Value is either a stream,
 If DESTINATION is a stream, a pathname, a string, or ‘t’, then the
 result is ‘nil’.  Otherwise, the result is a string containing the
 output.</pre>
+    </div>
+   </div>
+   <div class="definition" id="_64ecab79-f487-5daf-b6a7-fb142fefff92">
+    <div class="signature">
+     <table class="signature">
+      <colgroup>
+       <col />
+       <col />
+       <col />
+      </colgroup>
+      <tbody>
+       <tr>
+	<td class="symbol"><a href="#contents"><span class="symbol">rotor-positions</span></a></td>
+	<td class="lambda-list"><span class="lambda-list">(<span class="variable">enigma</span> <span class="lambda-list-keyword">&amp;key</span> (<span class="variable">result-type</span>&nbsp;<span class="init-form">(quote list)</span>) (<span class="variable">element-type</span>&nbsp;<span class="init-form">(quote character)</span>))</span></td>
+	<td class="category"><span class="category">Function</span></td>
+       </tr>
+      </tbody>
+     </table>
+    </div>
+    <div class="documentation">
+     <pre>Return the current position of the rotors in wheel order.
+
+First argument ENIGMA is an Enigma object.
+Keyword arguments RESULT-TYPE and ELEMENT-TYPE specify the sequence
+ type and element type of the result.
+
+Value is a sequence of wheel position indicators.</pre>
     </div>
    </div>
   </div>

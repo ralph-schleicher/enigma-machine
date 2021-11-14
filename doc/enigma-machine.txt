@@ -148,3 +148,13 @@ operate (enigma destination source)
    If DESTINATION is a stream, a pathname, a string, or ‘t’, then the
    result is ‘nil’.  Otherwise, the result is a string containing the
    output.
+
+                                                                      [Function]
+rotor-positions (enigma &key (result-type 'list) (element-type 'character))
+   Return the current position of the rotors in wheel order.
+
+   First argument ENIGMA is an Enigma object.
+   Keyword arguments RESULT-TYPE and ELEMENT-TYPE specify the sequence
+    type and element type of the result.
+
+   Value is a sequence of wheel position indicators.
