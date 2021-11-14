@@ -109,35 +109,6 @@ OBWN"))))
   (aachen :M3)
   (aachen :M4))
 
-(defun looks (model)
-  "Message from Kapt. Lt. Hartwig Looks, U-264."
-  (let ((enigma (make-enigma model)))
-    (ecase model
-      ((:M4)
-       (configure enigma :umkehrwalze "B"
-			 :walzenlage '("β" "II" "IV" "I")
-			 :ringstellung "AAAV"
-			 :grundstellung "VJNA"
-			 :steckerverbindungen '("AT" "BL" "DF" "GJ" "HM"
-						"NW" "OP" "QY" "RZ" "VX"))
-       (assert-equal "
-VONV ONJL OOKS JHFF TTTE INSE INSD REIZ WOYY QNNS
-NEUN INHA LTXX BEIA NGRI FFUN TERW ASSE RGED RUEC
-KTYW ABOS XLET ZTER GEGN ERST ANDN ULAC HTDR EINU
-LUHR MARQ UANT ONJO TANE UNAC HTSE YHSD REIY ZWOZ
-WONU LGRA DYAC HTSM YSTO SSEN ACHX EKNS VIER MBFA
-ELLT YNNN NNNO OOVI ERYS ICHT EINS NULL"
-        (operate enigma nil "
-NCZW VUSX PNYM INHZ XMQX SFWX WLKJ AHSH NMCO CCAK
-UQPM KCSM HKSE INJU SBLK IOSX CKUB HMLL XCSJ USRR
-DVKO HULX WCCB GVLI YXEO AHXR HKKF VDRE WEZL XOBA
-FGYU JQUK GRTV UKAM EURB VEKS UHHV OYHA BCJW MAKL
-FKLM YFVN RIZR VVRT KOFD ANJM OLBG FFLE OPRG TFLV
-RHOW OPBE KVWM UQFM PWPA RMFH AGKX IIBG"))))))
-
-(define-test looks-tests
-  (looks :M4))
-
 (defun t-dir (file-name)
   "Run test FILE-NAME in directory ‘t’."
   (let* ((directory '(:relative "t"))
