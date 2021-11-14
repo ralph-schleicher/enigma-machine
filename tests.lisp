@@ -74,42 +74,7 @@
   (double-stepping :M3)
   (double-stepping :M4))
 
-(defun aachen (model)
-  (let ((enigma (make-enigma model)))
-    (ecase model
-      ((:I :M3)
-       (configure enigma :umkehrwalze "B"
-			 :walzenlage '("I" "IV" "III")
-			 :ringstellung '(16 26 8)
-			 :grundstellung "RTZ"))
-      ((:M4)
-       ;; Reflector B and rotor β are compatible if ring setting and
-       ;; starting position of rotor β is one.
-       (configure enigma :umkehrwalze "B"
-			 :walzenlage '("β" "I" "IV" "III")
-			 :ringstellung '(1 16 26 8)
-			 :grundstellung "ARTZ")))
-    (configure enigma :steckerverbindungen '("AD" "CN" "ET" "FL" "GI"
-					     "JV" "KZ" "PU" "QY" "WX"))
-    (assert-equal "
-      DASOB ERKOM MANDO DERWE HRMAQ TGIBT BEKAN NTXAA CHENX
-AACHE NXIST GERET TETXD URQGE BUEND ELTEN EINSA TZDER HILFS
-KRAEF TEKON NTEDI EBEDR OHUNG ABGEW ENDET UNDDI ERETT UNGDE
-RSTAD TGEGE NXEIN SXAQT XNULL XNULL XUHRS IQERG ESTEL LTWER
-DENX"
-     (operate enigma nil "
-      LJPQH SVDWC LYXZQ FXHIU VWDJO BJNZX RCWEO TVNJC IONTF
-QNSXW ISXKH JDAGD JVAKU KVMJA JHSZQ QJHZO IAVZO WMSCK ASRDN
-XKKSR FHCXC MPJGX YIJCC KISYY SHETX VVOVD QLZYT NJXNU WKZRX
-UJFXM BDIBR VMJKR HTCUJ QPTEE IYNYN JBEAQ JCLMU ODFWM ARQCF
-OBWN"))))
-
-(define-test aachen-tests
-  (aachen :I)
-  (aachen :M3)
-  (aachen :M4))
-
-(defun t-dir (file-name)
+(defun t-dir (file-name &optional model-name)
   "Run test FILE-NAME in directory ‘t’."
   (let* ((directory '(:relative "t"))
 	 (cipher (make-pathname :directory directory
@@ -119,7 +84,7 @@ OBWN"))))
 			       :name file-name
 			       :type "plain"))
 	 (lisp (make-pathname :directory directory
-			      :name file-name
+			      :name (or model-name file-name)
 			      :type "lisp"))
 	 (enigma (with-open-file (stream lisp)
 		   (eval (read stream))))
@@ -136,6 +101,9 @@ OBWN"))))
      (operate enigma nil cipher))))
 
 (define-test t-dir-tests
+  (t-dir "aachen" "aachen-i")
+  (t-dir "aachen" "aachen-m3")
+  (t-dir "aachen" "aachen-m4")
   (t-dir "looks")
   (t-dir "doenitz"))
 
