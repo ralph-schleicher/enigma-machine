@@ -41,7 +41,8 @@
   (:export #:make-enigma
 	   #:reset
 	   #:configure
-	   #:operate)
+	   #:operate
+	   #:rotor-positions)
   (:documentation "An Enigma machine simulator.
 
 The Enigma machine is a cipher device used to encrypt German military
