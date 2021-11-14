@@ -45,9 +45,26 @@
 	   #:rotor-positions)
   (:documentation "An Enigma machine simulator.
 
-The Enigma machine is a cipher device used to encrypt German military
-communications during World War II.  Suppose your radio operator has
-received the following encoded message.
+The Enigma machine is a cipher device used to secure German
+military communications during World War II.
+
+This simulator provides the following features:
+
+   * You have the choice between the Enigma models Enigma I,
+     Enigma-M3, Enigma-M4, and Enigma-G.
+
+   * The plugboard connections, entry wheel, wheel order,
+     ring settings, starting positions, and reflector can
+     be configured.
+
+   * The double-stepping anomaly of the ratchet and pawl
+     mechanism is implemented.  This does not apply to the
+     Enigma-G model since it has a gear drive.
+
+   * Operating an Enigma is compatible with Common Lisp's
+     stream concept.
+
+Suppose your radio operator has received this encrypted message:
 
      2220 - 204 - QWE EWG -
 
