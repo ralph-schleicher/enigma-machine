@@ -856,4 +856,31 @@ output."))
   (with-input-from-string (input "")
     (operate enigma output input)))
 
+(defun rotor-positions (enigma &key (result-type 'list) (element-type 'character))
+  "Return the current position of the rotors in wheel order.
+
+First argument ENIGMA is an Enigma object.
+Keyword arguments RESULT-TYPE and ELEMENT-TYPE specify the sequence
+ type and element type of the result.
+
+Value is a sequence of wheel position indicators."
+  (check-type enigma enigma)
+  (with-slots (alphabet rotors-in-series starting-positions rotors* dirty) enigma
+    (let ((result (if (getf dirty :rotor-positions)
+		      (iter (for mark :in-sequence starting-positions)
+			    (collecting (wheel-position mark) :result-type 'vector))
+		    (iter (for wheel :in-vector rotors*)
+			  (collecting (first wheel) :result-type 'vector)))))
+      (when (/= rotors-in-series (length result))
+	(error "Wrong number of rotors."))
+      (alexandria:eswitch (element-type :test #'subtypep)
+	('character
+	 (iter (for pos :in-vector result :with-index index)
+	       (setf (aref result index) (aref alphabet pos))))
+	('(integer 1)
+	  (iter (for pos :in-vector result :with-index index)
+		(setf (aref result index) (1+ pos))))
+	('(integer 0))) ;no-op
+      (coerce result result-type))))
+
 ;;; enigma-machine.lisp ends here
