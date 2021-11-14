@@ -136,7 +136,8 @@ OBWN"))))
      (operate enigma nil cipher))))
 
 (define-test t-dir-tests
-  (t-dir "looks"))
+  (t-dir "looks")
+  (t-dir "doenitz"))
 
 (let ((lisp-unit:*print-errors* t)
       (lisp-unit:*print-failures* t)
