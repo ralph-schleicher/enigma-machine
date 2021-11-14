@@ -138,6 +138,35 @@ RHOW OPBE KVWM UQFM PWPA RMFH AGKX IIBG"))))))
 (define-test looks-tests
   (looks :M4))
 
+(defun t-dir (file-name)
+  "Run test FILE-NAME in directory ‘t’."
+  (let* ((directory '(:relative "t"))
+	 (cipher (make-pathname :directory directory
+				:name file-name
+				:type "cipher"))
+	 (plain (make-pathname :directory directory
+			       :name file-name
+			       :type "plain"))
+	 (lisp (make-pathname :directory directory
+			      :name file-name
+			      :type "lisp"))
+	 (enigma (with-open-file (stream lisp)
+		   (eval (read stream))))
+	 (start (rotor-positions enigma)))
+    ;; Encoding.
+    (configure enigma :grundstellung start)
+    (assert-equal
+     (alexandria:read-file-into-string cipher)
+     (operate enigma nil plain))
+    ;; Decoding.
+    (configure enigma :grundstellung start)
+    (assert-equal
+     (alexandria:read-file-into-string plain)
+     (operate enigma nil cipher))))
+
+(define-test t-dir-tests
+  (t-dir "looks"))
+
 (let ((lisp-unit:*print-errors* t)
       (lisp-unit:*print-failures* t)
       (lisp-unit:*print-summary* t))
