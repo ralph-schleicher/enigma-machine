@@ -34,7 +34,7 @@
 ## Code:
 
 PACKAGE = enigma-machine
-VERSION = 1.0
+VERSION = 1.0.1
 
 ### Rules
 
