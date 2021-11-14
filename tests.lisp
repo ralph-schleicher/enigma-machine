@@ -63,9 +63,7 @@
      (every (lambda (expected)
 	      (operate enigma nil "N")
 	      (string= expected
-		       (iter (with alphabet = (slot-value enigma 'enigma-machine::alphabet))
-			     (for wheel :in-vector (slot-value enigma 'enigma-machine::rotors*) :from first-wheel)
-			     (collecting (aref alphabet (first wheel)) :result-type 'string))))
+		       (subseq (rotor-positions enigma :result-type 'string) first-wheel)))
 	    '("ADV" ;first key press
 	      "AEW" ;second key press
 	      "BFX" ;third key press, double-stepping
