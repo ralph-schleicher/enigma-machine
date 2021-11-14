@@ -43,7 +43,8 @@
 	    :symbols '(enigma-machine:make-enigma
 		       enigma-machine:configure
 		       enigma-machine:reset
-		       enigma-machine:operate)
+		       enigma-machine:operate
+		       enigma-machine:rotor-positions)
 	    :generic-functions t
 	    :methods nil)))
   (rs-doc:generate-doc :data doc
