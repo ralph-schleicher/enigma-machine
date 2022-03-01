@@ -428,7 +428,7 @@ Keyword argument ENTRY-WHEEL or EINTRITTSWALZE specifies the
  Most Enigma models have a fixed entry wheel which can't be
  configured.
 Keyword argument WHEEL-ORDER or WALZENLAGE specifies the wheel
- order or the rotors from left to right.  Value is a sequence
+ order of the rotors from left to right.  Value is a sequence
  of wheel labels.
 Keyword argument RING-SETTINGS, RING-SETTING, or RINGSTELLUNG
  specifies the ring settings of the rotors in wheel order.
