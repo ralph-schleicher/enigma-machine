@@ -364,8 +364,8 @@ backward direction is from the reflector to the entry wheel.")
   "Create an Enigma machine.
 
 Argument MODEL is a string designator identifying the Enigma model.
- Known models are the Enigma I, Enigma-M3, and Enigma-M4.  Case is
- not significant when specifying the model.
+ Known models are the Enigma I, Enigma-M3, Enigma-M4, and Enigma-G.
+ Case is not significant when specifying the model.
 
 Return value is an Enigma object."
   (check-type model alexandria:string-designator)
