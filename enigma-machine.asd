@@ -39,7 +39,7 @@
   :description "An Enigma machine simulator."
   :author "Ralph Schleicher <rs@ralph-schleicher.de>"
   :license "Modified BSD License"
-  :version "1.0.1"
+  :version "1.0.2"
   :depends-on (:alexandria :iterate)
   :components ((:file "enigma-machine")))
 
